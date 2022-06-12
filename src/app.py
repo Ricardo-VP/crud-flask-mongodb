@@ -57,6 +57,33 @@ def get_user(id):
     return send_response(response)
 
 
+@app.route('/users/<id>', methods=['PUT'])
+def update_user(id):
+    # Setup
+    username = request.json['username']
+    password = request.json['password']
+    email = request.json['email']
+
+    if username and email and password:
+        hashed_password = generate_password_hash(password)
+        mongo.db.users.update_one(
+            {
+                '_id': ObjectId(id)
+            },
+            {
+               '$set': {
+                    'username': username,
+                    'password': hashed_password,
+                    'email': email,
+                }
+            }
+        )
+        response = jsonify({
+            'message': 'User with id = ' + id + ' was updated'
+        })
+    return response
+
+
 @app.route('/users/<id>', methods=['DELETE'])
 def delete_user(id):
     mongo.db.users.delete_one({'_id': ObjectId(id)})
