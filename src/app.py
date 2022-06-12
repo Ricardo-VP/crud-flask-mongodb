@@ -10,6 +10,10 @@ app.config['MONGO_URI'] = 'mongodb://localhost:27017/flaskmongodb'
 mongo = PyMongo(app)
 
 
+def send_response(body):
+    return Response(body, mimetype='application/json')
+
+
 @app.route('/users', methods=['POST'])
 def create_user():
     # Receiving data
@@ -42,14 +46,24 @@ def get_users():
     users = mongo.db.users.find()
     response = json_util.dumps(users)
 
-    return Response(response, mimetype='application/json')
+    return send_response(response)
 
 
 @app.route('/users/<id>', methods=['GET'])
 def get_user(id):
     user = mongo.db.users.find_one({'_id': ObjectId(id)})
     response = json_util.dumps(user)
-    return Response(response, mimetype='application/json')
+
+    return send_response(response)
+
+
+@app.route('/users/<id>', methods=['DELETE'])
+def delete_user(id):
+    mongo.db.users.delete_one({'_id': ObjectId(id)})
+    response = jsonify({
+        'message': 'User with id(' + id + ') was deleted',
+    })
+    return response
 
 
 @app.errorhandler(404)
