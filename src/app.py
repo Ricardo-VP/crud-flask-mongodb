@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -31,7 +31,18 @@ def create_user():
         }
         return response
     else:
-        return {'message': 'Error, user must have username, password and email'}
+        return not_found()
+
+
+@app.errorhandler(404)
+def not_found(error=None):
+    response = jsonify({
+        'message': 'Resource not found: ' + request.url,
+        'status': 404
+    })
+    response.status_code = 404
+
+    return response
 
 
 if __name__ == "__main__":
