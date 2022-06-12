@@ -1,6 +1,7 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
+from bson import json_util
 
 app = Flask(__name__)
 app.config['MONGO_URI'] = 'mongodb://localhost:27017/flaskmongodb'
@@ -33,6 +34,12 @@ def create_user():
     else:
         return not_found()
 
+@app.route('/users', methods=['GET'])
+def get_users():
+    users = mongo.db.users.find()
+    response = json_util.dumps(users)
+
+    return Response(response, mimetype='application/json')
 
 @app.errorhandler(404)
 def not_found(error=None):
